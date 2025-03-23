@@ -3,20 +3,20 @@ import requests
 import json
 
 st.title("💵 Prédiction de Crédit")
-
 st.markdown("Remplis les informations ci-dessous pour tester le modèle.")
 
-# Formulaire utilisateur
-AMT_INCOME_TOTAL = st.number_input("Revenu total", min_value=0.0)
-AMT_CREDIT = st.number_input("Montant du crédit", min_value=0.0)
-AMT_ANNUITY = st.number_input("Montant de l'annuité", min_value=0.0)
-CNT_FAM_MEMBERS = st.number_input("Nombre de membres dans la famille", min_value=1.0, step=1.0)
-DAYS_BIRTH = st.number_input("Âge en jours (ex: -12000)", value=-12000.0)
-DAYS_EMPLOYED = st.number_input("Jours d'emploi (ex: -3000)", value=-3000.0)
-DAYS_REGISTRATION = st.number_input("Jours depuis l'inscription", value=-4000.0)
-DAYS_ID_PUBLISH = st.number_input("Jours depuis publication ID", value=-3500.0)
+# Champs visibles par l'utilisateur (en positif)
+AMT_INCOME_TOTAL = st.number_input("Revenu total", min_value=0.0, value=10000.0)
+AMT_CREDIT = st.number_input("Montant du crédit", min_value=0.0, value=200000.0)
+AMT_ANNUITY = st.number_input("Montant de l'annuité", min_value=0.0, value=70000.0)
+CNT_FAM_MEMBERS = st.number_input("Nombre de membres dans la famille", min_value=1.0, step=1.0, value=6.0)
 
-# Envoyer la requête
+# Champs en jours, mais affichés en valeur positive
+AGE_DAYS = st.number_input("Âge (en jours)", value=9000.0, min_value=0.0)
+EMPLOYED_DAYS = st.number_input("Jours d'emploi", value=0.0, min_value=0.0)
+REGISTRATION_DAYS = st.number_input("Jours depuis inscription", value=100.0, min_value=0.0)
+ID_PUBLISH_DAYS = st.number_input("Jours depuis publication ID", value=300.0, min_value=0.0)
+
 if st.button("🔍 Prédire"):
     payload = {
         "features": [{
@@ -24,10 +24,11 @@ if st.button("🔍 Prédire"):
             "AMT_CREDIT": AMT_CREDIT,
             "AMT_ANNUITY": AMT_ANNUITY,
             "CNT_FAM_MEMBERS": CNT_FAM_MEMBERS,
-            "DAYS_BIRTH": DAYS_BIRTH,
-            "DAYS_EMPLOYED": DAYS_EMPLOYED,
-            "DAYS_REGISTRATION": DAYS_REGISTRATION,
-            "DAYS_ID_PUBLISH": DAYS_ID_PUBLISH
+            # Conversion en négatif
+            "DAYS_BIRTH": -AGE_DAYS,
+            "DAYS_EMPLOYED": -EMPLOYED_DAYS,
+            "DAYS_REGISTRATION": -REGISTRATION_DAYS,
+            "DAYS_ID_PUBLISH": -ID_PUBLISH_DAYS
         }]
     }
 
@@ -38,8 +39,17 @@ if st.button("🔍 Prédire"):
     )
 
     if response.status_code == 200:
-        result = response.json()
-        st.success(f"✅ Résultat : {result['decision'][0]}")
-        st.write("Probabilité :", result["probability"][0])
+        try:
+            result = response.json()
+            st.success(f"✅ Résultat : {result['decision'][0]}")
+            st.write("Probabilité :", result["probability"][0])
+        except json.JSONDecodeError:
+            st.error("❌ Erreur : réponse non JSON.")
+            st.write(response.text)
     else:
-        st.error(f"❌ Erreur : {response.json()['error']}")
+        try:
+            error_data = response.json()
+            st.error(f"❌ Erreur : {error_data.get('error', 'Erreur inconnue')}")
+        except json.JSONDecodeError:
+            st.error(f"❌ Erreur {response.status_code} : réponse non JSON.")
+            st.write(response.text)
