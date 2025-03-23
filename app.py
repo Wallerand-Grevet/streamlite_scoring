@@ -41,15 +41,22 @@ if st.button("🔍 Prédire"):
     if response.status_code == 200:
         try:
             result = response.json()
-            st.success(f"✅ Résultat : {result['decision'][0]}")
-            st.write("Probabilité :", result["probability"][0])
+            decision = result['decision'][0]
+            probability = result["probability"][0]
+
+            if decision == "Crédit accordé":
+                st.success(f"✅ Résultat : {decision}")
+                st.markdown(
+                    f"<span style='color:green'>Probabilité : {probability:.2%}</span>",
+                    unsafe_allow_html=True
+                )
+            else:
+                st.error(f"❌ Résultat : {decision}")
+                st.markdown(
+                    f"<span style='color:red'>Probabilité : {probability:.2%}</span>",
+                    unsafe_allow_html=True
+                )
         except json.JSONDecodeError:
             st.error("❌ Erreur : réponse non JSON.")
             st.write(response.text)
-    else:
-        try:
-            error_data = response.json()
-            st.error(f"❌ Erreur : {error_data.get('error', 'Erreur inconnue')}")
-        except json.JSONDecodeError:
-            st.error(f"❌ Erreur {response.status_code} : réponse non JSON.")
-            st.write(response.text)
+
