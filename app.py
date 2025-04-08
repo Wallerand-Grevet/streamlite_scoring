@@ -49,7 +49,7 @@ with tab1:
                 data=json.dumps(payload)
             )
             result = response.json()
-
+            threshold = result.get("threshold", 0.65)
             decision = result["decision"][0]
             proba = result["probability"][0]
 
@@ -59,7 +59,14 @@ with tab1:
                 st.error(f"❌ Résultat : {decision}")
 
             st.metric("Probabilité d'accord", f"{proba*100:.2f}%")
+            st.caption(f"Seuil de décision utilisé : {threshold:.2f}")
 
+            delta = abs(proba - threshold)
+            if delta < 0.05:
+                st.warning(
+                    "⚠️ Cette décision est proche du seuil, elle pourrait basculer avec des variations mineures des données.")
+            else:
+                st.info("ℹ️ La décision est suffisamment éloignée du seuil.")
 
             if "shap_values" in result:
                 st.subheader("📈 Interprétation du score (SHAP)")
@@ -132,6 +139,8 @@ with tab3:
                     data=json.dumps(new_payload)
                 )
                 result = response.json()
+                threshold = result.get("threshold", 0.65)
+
                 decision = result["decision"][0]
                 proba = result["probability"][0]
 
@@ -141,7 +150,15 @@ with tab3:
                     st.error(f"❌ Résultat : {decision}")
 
                 st.metric("Probabilité", f"{proba*100:.2f}%")
-                
+                st.caption(f"Seuil de décision utilisé : {threshold:.2f}")
+
+                delta = abs(proba - threshold)
+                if delta < 0.05:
+                    st.warning(
+                        "⚠️ Cette prédiction est proche du seuil. La décision peut changer avec de légères modifications.")
+                else:
+                    st.info("ℹ️ La probabilité est suffisamment éloignée du seuil.")
+
                 st.caption("Cette probabilité est calculée selon les valeurs que vous avez renseignées.")
 
             except Exception as e:
