@@ -102,6 +102,27 @@ with tab2:
     st.pyplot(fig)
     st.caption("En rouge : position du client sélectionné. Ce graphique permet de comparer ce client à la population globale.")
 
+    st.subheader("Analyse bi-variée")
+    col1, col2 = st.columns(2)
+    with col1:
+        x_var = st.selectbox("Variable en abscisse (X)", options=[
+            "AMT_INCOME_TOTAL", "AMT_CREDIT", "AMT_ANNUITY", "CNT_FAM_MEMBERS"
+        ], key="x_var")
+    with col2:
+        y_var = st.selectbox("Variable en ordonnée (Y)", options=[
+            "AMT_INCOME_TOTAL", "AMT_CREDIT", "AMT_ANNUITY", "CNT_FAM_MEMBERS"
+        ], key="y_var")
+
+    fig2, ax2 = plt.subplots(figsize=(6, 4))
+    ax2.scatter(clients_df[x_var], clients_df[y_var], alpha=0.5, label="Tous les clients", color="lightgray")
+    ax2.scatter(client_data[x_var], client_data[y_var], color="red", label="Client sélectionné", edgecolor="black",
+                s=100)
+    ax2.set_xlabel(x_var)
+    ax2.set_ylabel(y_var)
+    ax2.set_title(f"Analyse bi-variée : {x_var} vs {y_var}")
+    ax2.legend()
+    st.pyplot(fig2)
+    st.caption("Ce graphique montre la position du client dans l’espace des deux variables sélectionnées.")
 
 ########################
 # Onglet 3 : Simulation (optionnel)
