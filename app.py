@@ -91,7 +91,7 @@ with tab2:
         "AMT_INCOME_TOTAL", "AMT_CREDIT", "AMT_ANNUITY", "CNT_FAM_MEMBERS"
     ])
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6, 4))
     ax.hist(clients_df[variable], bins=30, alpha=0.7, label="Tous les clients", color='gray')
     ax.axvline(client_data[variable], color='red', linestyle='dashed', linewidth=2, label="Client sélectionné")
 
